@@ -1,0 +1,88 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ IDEA / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+.gradle/
+local.properties
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Flutter / Dart / Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Web related
+.generated/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build artifacts
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/key.properties
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+
+# iOS / macOS build artifacts
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.framework
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Pods/
+**/macos/Flutter/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+
+# Windows build artifacts
+/windows/flutter/ephemeral/
+
+# Linux build artifacts
+/linux/flutter/ephemeral/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Test Coverage
+coverage/
+*.lcov
