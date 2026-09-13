@@ -211,6 +211,9 @@ class CadHoverHitTestService {
           interactionTip: '💡 Click to select • Drag anywhere to move • Drag handles to stretch • No forced margins!',
           targetRect: rect,
           pointerPosition: localPos,
+          amazonUrl: item.amazonUrl,
+          imageUrl: item.imageUrl,
+          productPrice: item.productPrice,
         );
       }
     }
@@ -288,32 +291,12 @@ class CadHoverHitTestService {
       );
     }
 
-    // Windows
-    // Window W1 (Bedroom North Window)
-    final win1Rect = Rect.fromPoints(Offset(origin.dx + rwPx * 0.35, origin.dy - 14), Offset(origin.dx + rwPx * 0.85, origin.dy + 14));
-    if (win1Rect.contains(localPos)) {
-      return CadHoverDetail(
-        title: 'Master Bedroom Window (W1)',
-        subtitle: 'Glazed double-pane sliding daylight window',
-        category: 'OPENING & EGRESS',
-        icon: Icons.window,
-        accentColor: const Color(0xFF38BDF8),
-        keyMetrics: {
-          'Clear Width': dims.format(dims.roomWidth * 0.5),
-          'Glazing': 'Double-insulated Acoustic Glass',
-          'Wall Alignment': 'North Exterior Wall (N)',
-        },
-        engineeringReason: 'Engineered to introduce optimal morning natural illumination while providing cross-ventilation across the suite.',
-        targetRect: win1Rect,
-        pointerPosition: localPos,
-      );
-    }
-
-    // Window W2 (Kitchen East Window)
+    // Windows (No window on bedroom South wall)
+    // Window W1 (Kitchen East Window)
     final win2Rect = Rect.fromPoints(Offset(origin.dx + rwPx + 15, origin.dy - 14), Offset(origin.dx + twPx - 15, origin.dy + 14));
     if (win2Rect.contains(localPos)) {
       return CadHoverDetail(
-        title: 'Kitchen Casement Window (W2)',
+        title: 'Kitchen Casement Window (W1)',
         subtitle: 'High-clearance exhaust and ventilation window',
         category: 'OPENING & EGRESS',
         icon: Icons.window,
@@ -506,7 +489,7 @@ class CadHoverHitTestService {
         accentColor: const Color(0xFF38BDF8),
         keyMetrics: {
           'North (N)': '↓ Pointing Down (Entry Corridor Side)',
-          'South (S)': '↑ Pointing Up (Daylight Window Side)',
+          'South (S)': '↑ Pointing Up (Solid Wall)',
           'East (E)': '→ Pointing Right (Kitchen & Stair Core)',
           'West (W)': '← Pointing Left (Master Bed Wall)',
         },

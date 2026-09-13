@@ -4,6 +4,7 @@ import '../models/architectural_design_option.dart';
 import '../models/dynamic_floor_model.dart';
 import '../services/design_option_manager_service.dart';
 import 'main_floor_experience_screen.dart';
+import 'bedroom_simulation_screen.dart';
 
 /// Startup Launcher & Saved Designs Hub.
 /// Greets user on app startup, allowing instant 1-click continuation of their
@@ -35,6 +36,19 @@ class _SavedDesignsLauncherScreenState extends State<SavedDesignsLauncherScreen>
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => const MainFloorExperienceScreen(),
+      ),
+    );
+    _refreshState();
+  }
+
+  void _openDesignIn3DSimulation(ArchitecturalDesignOption design) async {
+    DesignOptionManagerService.switchActiveDesign(design.id);
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => BedroomSimulationScreen(
+          dims: design.dims,
+          placements: design.placements,
+        ),
       ),
     );
     _refreshState();
@@ -745,17 +759,35 @@ class _SavedDesignsLauncherScreenState extends State<SavedDesignsLauncherScreen>
               ),
             ],
           ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF38BDF8),
-              foregroundColor: const Color(0xFF0F172A),
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 4,
-            ),
-            onPressed: () => _openDesignInStudio(latest),
-            icon: const Icon(Icons.play_arrow, size: 20),
-            label: const Text('Open in 2D Studio', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF9900),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 4,
+                ),
+                onPressed: () => _openDesignIn3DSimulation(latest),
+                icon: const Icon(Icons.view_in_ar, size: 20),
+                label: const Text('🌟 3D Simulation', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5)),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF38BDF8),
+                  foregroundColor: const Color(0xFF0F172A),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 4,
+                ),
+                onPressed: () => _openDesignInStudio(latest),
+                icon: const Icon(Icons.play_arrow, size: 20),
+                label: const Text('Open in 2D Studio', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5)),
+              ),
+            ],
           ),
         ],
       ),
@@ -925,6 +957,19 @@ class _SavedDesignsLauncherScreenState extends State<SavedDesignsLauncherScreen>
                     color: Colors.redAccent,
                     tooltip: 'Delete Design',
                     onPressed: () => _showDeleteDialog(design),
+                  ),
+                  const SizedBox(width: 4),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF9900).withValues(alpha: 0.2),
+                      foregroundColor: const Color(0xFFFF9900),
+                      side: const BorderSide(color: Color(0xFFFF9900), width: 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    ),
+                    onPressed: () => _openDesignIn3DSimulation(design),
+                    icon: const Icon(Icons.view_in_ar, size: 13),
+                    label: const Text('3D Sim', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 4),
                   ElevatedButton.icon(

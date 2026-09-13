@@ -13,7 +13,9 @@ import '../services/blueprint_export_service.dart';
 import '../services/architectural_prompt_service.dart';
 import '../services/cad_hover_hit_test_service.dart';
 import '../services/design_option_manager_service.dart';
+import '../services/url_launcher_helper.dart';
 import 'prompt_generator_screen.dart';
+import 'bedroom_simulation_screen.dart';
 
 enum BlueprintCanvasMode {
   plan2D,
@@ -623,6 +625,29 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
           ],
         ),
         actions: [
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9900),
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              _applyInputs();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (ctx) => BedroomSimulationScreen(
+                    dims: _dims,
+                    placements: _placements,
+                    initialFocusItemId: _selectedItemId,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.view_in_ar, size: 16),
+            label: const Text('🌟 3D Simulation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+          const SizedBox(width: 8),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1E293B),
@@ -2304,6 +2329,63 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
                 ),
                 const SizedBox(width: 6),
 
+                // Amazon Product Quick Action
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF9900).withValues(alpha: 0.2),
+                    foregroundColor: const Color(0xFFFF9900),
+                    side: const BorderSide(color: Color(0xFFFF9900), width: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () {
+                    if (selectedPlacement.amazonUrl != null && selectedPlacement.amazonUrl!.trim().isNotEmpty) {
+                      UrlLauncherHelper.openUrl(selectedPlacement.amazonUrl!);
+                    } else {
+                      _showEditItemDimensionDialog(pIndex, selectedItemCalc);
+                    }
+                  },
+                  icon: Icon(
+                    selectedPlacement.amazonUrl != null && selectedPlacement.amazonUrl!.trim().isNotEmpty
+                        ? Icons.open_in_new
+                        : Icons.add_link,
+                    size: 14,
+                  ),
+                  label: Text(
+                    selectedPlacement.amazonUrl != null && selectedPlacement.amazonUrl!.trim().isNotEmpty
+                        ? 'Open Amazon'
+                        : 'Amazon Link',
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 6),
+
+                // 3D Simulation Quick Button
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E293B),
+                    foregroundColor: const Color(0xFFFF9900),
+                    side: const BorderSide(color: Color(0xFFFF9900), width: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () {
+                    _applyInputs();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => BedroomSimulationScreen(
+                          dims: _dims,
+                          placements: _placements,
+                          initialFocusItemId: selectedPlacement.id,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.view_in_ar, size: 14),
+                  label: const Text('Simulate in 3D', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 6),
+
                 // Duplicate Item Button
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
@@ -2397,6 +2479,9 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
     final heightCtrl = TextEditingController(
         text: (p.customHeight ?? calc.height).toStringAsFixed(2));
     final notesCtrl = TextEditingController(text: p.customNotes ?? '');
+    final amazonUrlCtrl = TextEditingController(text: p.amazonUrl ?? '');
+    final imageUrlCtrl = TextEditingController(text: p.imageUrl ?? '');
+    final priceCtrl = TextEditingController(text: p.productPrice ?? '');
     String selectedWall = p.targetWall;
     String selectedFacing = p.facingDirection;
     int selectedRotation = p.rotationDegrees;
@@ -2406,6 +2491,7 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
+            final hasAmazonUrl = amazonUrlCtrl.text.trim().isNotEmpty;
             return AlertDialog(
               backgroundColor: const Color(0xFF0F172A),
               shape: RoundedRectangleBorder(
@@ -2425,14 +2511,14 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
                 ],
               ),
               content: SizedBox(
-                width: 440,
+                width: 480,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Change dimensions, wall attachment, and facing direction/rotation.',
+                        'Change dimensions, Amazon product link, and wall attachment/orientation.',
                         style: TextStyle(color: Colors.white60, fontSize: 12),
                       ),
                       const SizedBox(height: 16),
@@ -2448,6 +2534,103 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
                           fillColor: const Color(0xFF1E293B),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Amazon Product Link & Instant Open Button
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: hasAmazonUrl ? const Color(0xFFFF9900).withValues(alpha: 0.6) : Colors.transparent),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.shopping_bag_outlined, color: Color(0xFFFF9900), size: 16),
+                                const SizedBox(width: 6),
+                                const Text('Amazon Product Link (Optional)', style: TextStyle(color: Color(0xFFFF9900), fontSize: 11.5, fontWeight: FontWeight.bold)),
+                                const Spacer(),
+                                if (hasAmazonUrl)
+                                  InkWell(
+                                    onTap: () => UrlLauncherHelper.openUrl(amazonUrlCtrl.text.trim()),
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFF9900),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.open_in_new, size: 11, color: Colors.black),
+                                          SizedBox(width: 3),
+                                          Text('Open in New Tab', style: TextStyle(color: Colors.black, fontSize: 9.5, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: amazonUrlCtrl,
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              decoration: const InputDecoration(
+                                hintText: 'https://www.amazon.com/dp/...',
+                                hintStyle: TextStyle(color: Colors.white30, fontSize: 11),
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                                border: InputBorder.none,
+                              ),
+                              onChanged: (_) => setDialogState(() {}),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Direct Product Image URL & Price Row
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: TextField(
+                              controller: imageUrlCtrl,
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              decoration: InputDecoration(
+                                labelText: 'Product Image URL (Optional)',
+                                labelStyle: const TextStyle(color: Colors.white70, fontSize: 11),
+                                hintText: 'https://m.media-amazon.com/...',
+                                hintStyle: const TextStyle(color: Colors.white24, fontSize: 10.5),
+                                filled: true,
+                                fillColor: const Color(0xFF1E293B),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: priceCtrl,
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              decoration: InputDecoration(
+                                labelText: 'Price (e.g. \$299)',
+                                labelStyle: const TextStyle(color: Colors.white70, fontSize: 11),
+                                filled: true,
+                                fillColor: const Color(0xFF1E293B),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
 
@@ -2644,12 +2827,15 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
                         customLength: newL,
                         customHeight: newH,
                         customNotes: notesCtrl.text.trim().isNotEmpty ? notesCtrl.text.trim() : p.customNotes,
+                        amazonUrl: amazonUrlCtrl.text.trim().isNotEmpty ? amazonUrlCtrl.text.trim() : null,
+                        imageUrl: imageUrlCtrl.text.trim().isNotEmpty ? imageUrlCtrl.text.trim() : null,
+                        productPrice: priceCtrl.text.trim().isNotEmpty ? priceCtrl.text.trim() : null,
                       );
                     });
                     Navigator.of(dialogCtx).pop();
                   },
-                  icon: const Icon(Icons.check, size: 15),
-                  label: const Text('Save Dimensions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  icon: const Icon(Icons.check, size: 16),
+                  label: const Text('Save & Apply', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             );

@@ -237,7 +237,7 @@ class _PromptGeneratorScreenState extends State<PromptGeneratorScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _CardinalBadge('North Wall (N)', 'Main Entry Door', Color(0xFFEF4444)),
-                            _CardinalBadge('South Wall (S)', 'Glazed Windows', Color(0xFF38BDF8)),
+                            _CardinalBadge('South Wall (S)', 'Solid Wall', Color(0xFF38BDF8)),
                             _CardinalBadge('East Wall (E)', 'Gallery & Storage', Color(0xFF10B981)),
                             _CardinalBadge('West Wall (W)', 'Solid Feature Wall', Color(0xFF818CF8)),
                           ],

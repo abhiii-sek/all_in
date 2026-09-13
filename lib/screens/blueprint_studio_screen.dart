@@ -6,6 +6,9 @@ import '../../services/blueprint_export_service.dart';
 import '../../widgets/blueprint_canvas/blueprint_interactive_viewer.dart';
 import '../../widgets/blueprint_canvas/layout_selection_sheet.dart';
 import 'wizard/room_wizard_screen.dart';
+import 'bedroom_simulation_screen.dart';
+import '../models/dynamic_floor_model.dart';
+import '../services/architectural_prompt_service.dart';
 
 class BlueprintStudioScreen extends StatefulWidget {
   final RoomModel room;
@@ -42,6 +45,44 @@ class _BlueprintStudioScreenState extends State<BlueprintStudioScreen> {
     }
   }
 
+  void _open3DSimulation() {
+    final room = widget.room;
+    final dims = DynamicFloorDimensions(
+      unit: DimensionUnit.meters,
+      roomWidth: room.effectiveWidth,
+      roomLength: room.effectiveLength,
+      ceilingHeight: room.ceilingHeight,
+    );
+
+    final placements = room.requestedItems.map((item) {
+      return RoomItemPlacement(
+        id: item.id,
+        itemName: item.name,
+        targetWall: 'West Wall (W)',
+        facingDirection: 'Auto (Inward)',
+        customWidth: item.width,
+        customLength: item.depth,
+        customHeight: item.height,
+        customPosX: item.x,
+        customPosY: item.y,
+        customNotes: item.notes,
+        amazonUrl: item.amazonUrl,
+        imageUrl: item.imageUrl,
+        productPrice: item.productPrice,
+        productBrand: item.productBrand,
+      );
+    }).toList();
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => BedroomSimulationScreen(
+          dims: dims,
+          placements: placements,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final room = widget.room;
@@ -64,6 +105,18 @@ class _BlueprintStudioScreenState extends State<BlueprintStudioScreen> {
           ],
         ),
         actions: [
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9900),
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: _open3DSimulation,
+            icon: const Icon(Icons.view_in_ar, size: 16),
+            label: const Text('🌟 3D Simulation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+          const SizedBox(width: 8),
           IconButton(
             tooltip: 'Edit Dimensions & Openings',
             icon: const Icon(Icons.edit_note, color: Color(0xFF38BDF8)),

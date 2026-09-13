@@ -105,6 +105,10 @@ class ArchitecturalDesignOption {
       'customPosX': p.customPosX,
       'customPosY': p.customPosY,
       'customNotes': p.customNotes,
+      'amazonUrl': p.amazonUrl,
+      'imageUrl': p.imageUrl,
+      'productPrice': p.productPrice,
+      'productBrand': p.productBrand,
     }).toList(),
     'createdAt': createdAt.toIso8601String(),
     'lastModified': lastModified.toIso8601String(),
@@ -157,6 +161,10 @@ class ArchitecturalDesignOption {
             customPosX: (p['customPosX'] as num?)?.toDouble(),
             customPosY: (p['customPosY'] as num?)?.toDouble(),
             customNotes: p['customNotes'] as String?,
+            amazonUrl: p['amazonUrl'] as String?,
+            imageUrl: p['imageUrl'] as String?,
+            productPrice: p['productPrice'] as String?,
+            productBrand: p['productBrand'] as String?,
           ));
         }
       }

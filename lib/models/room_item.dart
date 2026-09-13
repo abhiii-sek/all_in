@@ -47,6 +47,12 @@ class RoomItem {
   final String? notes;
   final Color primaryColor;
 
+  // Amazon Product Details
+  final String? amazonUrl;
+  final String? imageUrl;
+  final String? productPrice;
+  final String? productBrand;
+
   RoomItem({
     required this.id,
     required this.name,
@@ -63,6 +69,10 @@ class RoomItem {
     this.imageBase64,
     this.notes,
     this.primaryColor = const Color(0xFF3B82F6),
+    this.amazonUrl,
+    this.imageUrl,
+    this.productPrice,
+    this.productBrand,
   });
 
   RoomItem copyWith({
@@ -81,6 +91,10 @@ class RoomItem {
     String? imageBase64,
     String? notes,
     Color? primaryColor,
+    String? amazonUrl,
+    String? imageUrl,
+    String? productPrice,
+    String? productBrand,
   }) {
     return RoomItem(
       id: id ?? this.id,
@@ -98,6 +112,10 @@ class RoomItem {
       imageBase64: imageBase64 ?? this.imageBase64,
       notes: notes ?? this.notes,
       primaryColor: primaryColor ?? this.primaryColor,
+      amazonUrl: amazonUrl ?? this.amazonUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      productPrice: productPrice ?? this.productPrice,
+      productBrand: productBrand ?? this.productBrand,
     );
   }
 

@@ -14,6 +14,10 @@ class RoomItemPlacement {
   double? customPosX; // X position in room units
   double? customPosY; // Y position in room units
   String? customNotes;
+  String? amazonUrl;
+  String? imageUrl;
+  String? productPrice;
+  String? productBrand;
 
   RoomItemPlacement({
     required this.itemName,
@@ -28,6 +32,10 @@ class RoomItemPlacement {
     this.customPosX,
     this.customPosY,
     this.customNotes,
+    this.amazonUrl,
+    this.imageUrl,
+    this.productPrice,
+    this.productBrand,
   });
 
   RoomItemPlacement copyWith({
@@ -43,6 +51,10 @@ class RoomItemPlacement {
     double? customPosX,
     double? customPosY,
     String? customNotes,
+    String? amazonUrl,
+    String? imageUrl,
+    String? productPrice,
+    String? productBrand,
   }) {
     return RoomItemPlacement(
       id: id ?? this.id,
@@ -57,6 +69,10 @@ class RoomItemPlacement {
       customPosX: customPosX ?? this.customPosX,
       customPosY: customPosY ?? this.customPosY,
       customNotes: customNotes ?? this.customNotes,
+      amazonUrl: amazonUrl ?? this.amazonUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      productPrice: productPrice ?? this.productPrice,
+      productBrand: productBrand ?? this.productBrand,
     );
   }
 }
@@ -77,6 +93,10 @@ class MathematicalItemDimension {
   final String formula;
   final String engineeringReason;
   final bool isCustom;
+  final String? amazonUrl;
+  final String? imageUrl;
+  final String? productPrice;
+  final String? productBrand;
 
   const MathematicalItemDimension({
     required this.itemName,
@@ -94,6 +114,10 @@ class MathematicalItemDimension {
     this.customPosY,
     this.customElevation,
     this.isCustom = false,
+    this.amazonUrl,
+    this.imageUrl,
+    this.productPrice,
+    this.productBrand,
   });
 }
 
@@ -234,6 +258,10 @@ class ArchitecturalPromptService {
           formula: 'Width (W-E): ${dims.format(cW)}, Length (S-N): ${dims.format(cL)}, Height: ${dims.format(cH)}',
           engineeringReason: 'Position: (${dims.format(posX)}, ${dims.format(posY)}). Wall Gaps: W (Left): ${gapWest < u(0.05) ? "FLUSH" : dims.format(gapWest)}, E (Right): ${gapEast < u(0.05) ? "FLUSH" : dims.format(gapEast)}, S (Top): ${gapSouth < u(0.05) ? "FLUSH" : dims.format(gapSouth)}, N (Bottom): ${gapNorth < u(0.05) ? "FLUSH" : dims.format(gapNorth)}.',
           isCustom: true,
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
         continue;
       }
@@ -265,6 +293,10 @@ class ArchitecturalPromptService {
               : 'Width = ${dims.format(bedW)}, Length = ${dims.format(bedL)}',
           engineeringReason:
               'Attached to ${p.targetWall}, ${p.facingDirection}. Leaves ${dims.format(clearance)} central circulation walkway to the opposite wall.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else if (nameLower.contains('wardrobe') || nameLower.contains('closet') || nameLower.contains('cupboard') || nameLower.contains('almirah')) {
         final wardW = u(2.12).clamp(u(0.5), rW * 0.25);
@@ -296,6 +328,10 @@ class ArchitecturalPromptService {
           engineeringReason: isFullWall
               ? 'Spans 100% of ${p.targetWall} (${dims.format(wardL)}) from corner to corner with floor-to-ceiling joinery and sliding doors.'
               : 'Mounted flush along ${p.targetWall}, ${p.facingDirection}. Recalibrated with ${dims.format(marginBetweenItems)} spacing margin.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else if (nameLower.contains('dress') || nameLower.contains('desiss') || nameLower.contains('vanity') || nameLower.contains('mirror') || nameLower.contains('fram') || nameLower.contains('makeup')) {
         final dressW = u(1.5);
@@ -322,6 +358,10 @@ class ArchitecturalPromptService {
           formula: 'Depth = ${dims.format(dressW)}, Span = ${dims.format(dressL)} (Recalibrated on ${p.targetWall})',
           engineeringReason:
               'Full-length vertical dressing frame with integrated vanity counter and ambient edge-lighting on ${p.targetWall}.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else if (nameLower.contains('tv') || nameLower.contains('media') || nameLower.contains('console') || nameLower.contains('entertainment')) {
         final tvW = u(1.5);
@@ -347,6 +387,10 @@ class ArchitecturalPromptService {
           formula: 'Console Depth = ${dims.format(tvW)}, Length = ${dims.format(tvL)} (Recalibrated for co-placement)',
           engineeringReason:
               'Floating wall-mounted entertainment console on ${p.targetWall}, ${p.facingDirection} preserving unobstructed floor space.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else if (nameLower.contains('study') || nameLower.contains('table') || nameLower.contains('desk')) {
         final deskW = u(2.0);
@@ -373,6 +417,10 @@ class ArchitecturalPromptService {
           formula: 'Depth = ${dims.format(deskW)}, Length = ${dims.format(deskL)}',
           engineeringReason:
               'Aligned on ${p.targetWall}, ${p.facingDirection}. Reserves ${dims.format(chairClearance)} chair roll-back clearance.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else if (nameLower.contains('sofa') || nameLower.contains('couch') || nameLower.contains('recliner')) {
         final sofaW = (rW * 0.50).clamp(u(4.5), u(6.5));
@@ -394,6 +442,10 @@ class ArchitecturalPromptService {
           formula: 'Width = clamp(RoomWidth × 50%, ${dims.format(u(4.5))}, ${dims.format(u(6.5))}), Depth = RoomLength × 28%',
           engineeringReason:
               'Placed on ${p.targetWall}, ${p.facingDirection}. Establishes optimal viewing distance to the opposite media console.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       } else {
         final genW = (totalWallSpan * 0.35).clamp(u(2.0), u(4.5));
@@ -418,6 +470,10 @@ class ArchitecturalPromptService {
           customPosY: p.customPosY,
           formula: 'Proportional clamp: Width = ${dims.format(genW)}, Length = ${dims.format(genL)}',
           engineeringReason: 'Optimized placement along ${p.targetWall}, ${p.facingDirection} maintaining standard walkway buffer.',
+          amazonUrl: p.amazonUrl,
+          imageUrl: p.imageUrl,
+          productPrice: p.productPrice,
+          productBrand: p.productBrand,
         ));
       }
     }

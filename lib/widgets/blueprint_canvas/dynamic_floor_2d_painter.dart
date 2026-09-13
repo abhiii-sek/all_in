@@ -393,15 +393,9 @@ class DynamicFloor2DPainter extends CustomPainter {
     );
 
     // --- ARCHITECTURAL WINDOWS ---
-    // 1. Master Bedroom Window (Top Exterior Wall)
-    _drawWindow(
-      canvas,
-      p1: Offset(origin.dx + rwPx * 0.35, origin.dy),
-      p2: Offset(origin.dx + rwPx * 0.85, origin.dy),
-      label: 'W1: Bed Window (5.0 ft)',
-    );
+    // (Master Bedroom South/Top Wall has NO window per specification)
 
-    // 2. Bathroom Window / Ventilator (Bottom Exterior Wall)
+    // 1. Bathroom Window / Ventilator (Bottom Exterior Wall)
     _drawWindow(
       canvas,
       p1: Offset(origin.dx + bwPx * 0.20, origin.dy + tlPx),
@@ -409,12 +403,12 @@ class DynamicFloor2DPainter extends CustomPainter {
       label: 'V1: Bath Vent (2.0 ft)',
     );
 
-    // 3. Kitchen Window (Top Right Exterior Wall)
+    // 2. Kitchen Window (Top Right Exterior Wall)
     _drawWindow(
       canvas,
       p1: Offset(origin.dx + rwPx + 15, origin.dy),
       p2: Offset(origin.dx + twPx - 15, origin.dy),
-      label: 'W2: Kitchen Window (4.0 ft)',
+      label: 'W1: Kitchen Window (4.0 ft)',
     );
   }
 

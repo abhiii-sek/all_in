@@ -15,6 +15,9 @@ class CadHoverDetail {
   final String? interactionTip; // "💡 Drag to move • Drag handles to stretch • Click ⟳ to rotate"
   final Rect? targetRect; // The bounding box of the hovered element for highlight glow
   final Offset pointerPosition; // Where the mouse is in canvas space
+  final String? amazonUrl;
+  final String? imageUrl;
+  final String? productPrice;
 
   CadHoverDetail({
     required this.title,
@@ -31,5 +34,8 @@ class CadHoverDetail {
     this.interactionTip,
     this.targetRect,
     required this.pointerPosition,
+    this.amazonUrl,
+    this.imageUrl,
+    this.productPrice,
   });
 }

@@ -517,21 +517,6 @@ class WallElevationPainter extends CustomPainter {
 
       _drawItemBadge(canvas, doorRect, 'Bath Gate (2.5\' × 7.0\')', const Color(0xFFEAB308), Colors.black);
     }
-
-    // 3. Glazed Double-Pane Window W1 on South Wall (S)
-    if (wKeyLower.contains('south') || wKeyLower.contains('(s)')) {
-      final winW = dims.roomWidth * 0.50;
-      const winH = 4.5;
-      const winElev = 3.0;
-      final winPosX = (wallSpan - winW) / 2.0 * scale;
-      final winRect = Rect.fromLTWH(origin.dx + winPosX, floorY - (winElev + winH) * scale, winW * scale, winH * scale);
-
-      canvas.drawRect(winRect, Paint()..color = const Color(0xFF0284C7).withValues(alpha: 0.12));
-      canvas.drawRect(winRect, Paint()..color = const Color(0xFF0284C7)..strokeWidth = 2.0..style = PaintingStyle.stroke);
-      canvas.drawLine(Offset(winRect.center.dx, winRect.top), Offset(winRect.center.dx, winRect.bottom), Paint()..color = const Color(0xFF0284C7)..strokeWidth = 1.5);
-
-      _drawItemBadge(canvas, winRect, 'Bed Window W1 (${dims.format(winW)} × 4.5\')', const Color(0xFF0284C7), Colors.white);
-    }
   }
 
   void _drawSectionItems(Canvas canvas, WallSectionInfo section, Map<String, Rect> rectMap) {
