@@ -14,6 +14,7 @@ import '../services/architectural_prompt_service.dart';
 import '../services/cad_hover_hit_test_service.dart';
 import '../services/design_option_manager_service.dart';
 import '../services/url_launcher_helper.dart';
+import '../services/amazon_dimension_parser_service.dart';
 import 'prompt_generator_screen.dart';
 import 'bedroom_simulation_screen.dart';
 
@@ -679,7 +680,10 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (ctx) => PromptGeneratorScreen(initialDims: _dims),
+                  builder: (ctx) => PromptGeneratorScreen(
+                    initialDims: _dims,
+                    initialPlacements: _placements,
+                  ),
                 ),
               );
             },
@@ -2482,6 +2486,8 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
     final amazonUrlCtrl = TextEditingController(text: p.amazonUrl ?? '');
     final imageUrlCtrl = TextEditingController(text: p.imageUrl ?? '');
     final priceCtrl = TextEditingController(text: p.productPrice ?? '');
+    final amazonDescCtrl = TextEditingController();
+    String? amazonParsedSummary;
     String selectedWall = p.targetWall;
     String selectedFacing = p.facingDirection;
     int selectedRotation = p.rotationDegrees;
@@ -2711,6 +2717,85 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Auto-Fill Dimensions via Amazon Description String
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFFF9900).withValues(alpha: 0.45)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.straighten, color: Color(0xFFFF9900), size: 15),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Amazon Product Dimension String',
+                                  style: TextStyle(color: Color(0xFFFF9900), fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                if (amazonParsedSummary != null)
+                                  Flexible(
+                                    child: Text(
+                                      amazonParsedSummary!,
+                                      style: const TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: amazonDescCtrl,
+                                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                                    decoration: const InputDecoration(
+                                      hintText: 'e.g. 198.1L x 152.4W x 10.2Th Centimeter or 47.6D x 120W x 182.4H...',
+                                      hintStyle: TextStyle(color: Colors.white30, fontSize: 11),
+                                      isDense: true,
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9900),
+                                    foregroundColor: Colors.black,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                  ),
+                                  onPressed: () {
+                                    final text = amazonDescCtrl.text.trim();
+                                    if (text.isNotEmpty) {
+                                      final res = AmazonDimensionParserService.parse(text, targetUnit: _dims.unit);
+                                      setDialogState(() {
+                                        if (res.isValid) {
+                                          if (res.width != null) widthCtrl.text = res.width!.toStringAsFixed(2);
+                                          if (res.length != null) lengthCtrl.text = res.length!.toStringAsFixed(2);
+                                          if (res.height != null) heightCtrl.text = res.height!.toStringAsFixed(2);
+                                          amazonParsedSummary = res.formattedSummary;
+                                        } else {
+                                          amazonParsedSummary = 'Could not parse dimensions.';
+                                        }
+                                      });
+                                    }
+                                  },
+                                  icon: const Icon(Icons.auto_awesome, size: 13),
+                                  label: const Text('Auto-Fill', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
 
@@ -4000,9 +4085,9 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
           }),
           const SizedBox(height: 14),
 
-          // 4. Live Copyable Prompt Output Area
+          // 4. On-Demand Recalibration & Master Prompt Action Card
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: const Color(0xFF0B1120),
               borderRadius: BorderRadius.circular(12),
@@ -4011,73 +4096,70 @@ class _MainFloorExperienceScreenState extends State<MainFloorExperienceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Row(
                   children: [
-                    const Expanded(
-                      child: Row(
-                        children: [
-                          Icon(Icons.terminal, color: Color(0xFF38BDF8), size: 15),
-                          SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'Prompt Preview (2-3 2D & 3D)',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11.5),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () => _copyPromptToClipboard(fullPrompt),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.copy, size: 13, color: Color(0xFF38BDF8)),
-                          SizedBox(width: 4),
-                          Text('Copy', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.bold)),
-                        ],
+                    Icon(Icons.auto_awesome, color: Color(0xFF38BDF8), size: 16),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'AI Recalibration & Prompt Engine',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const Divider(color: Color(0xFF1E293B), height: 16),
+                const SizedBox(height: 6),
+                const Text(
+                  'Recalibrates exact coordinates (X, Y, Z), standard dimensions, orientations, wall clearances, and pairwise gaps between all items.',
+                  style: TextStyle(color: Colors.white60, fontSize: 11),
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
-                  height: 200,
-                  child: SingleChildScrollView(
-                    child: SelectableText(
-                      fullPrompt,
-                      style: const TextStyle(
-                        color: Color(0xFFCBD5E1),
-                        fontSize: 10.5,
-                        fontFamily: 'monospace',
-                        height: 1.4,
-                      ),
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF38BDF8),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (ctx) => PromptGeneratorScreen(
+                            initialDims: _dims,
+                            initialPlacements: _placements,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.tune, size: 15),
+                    label: const Text(
+                      'Open AI Prompt Studio & Recalibrate',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF38BDF8),
+                      side: const BorderSide(color: Color(0xFF38BDF8)),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _copyPromptToClipboard(fullPrompt),
+                    icon: const Icon(Icons.copy, size: 14),
+                    label: const Text(
+                      'Quick Copy Recalibrated Prompt',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
                     ),
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Bottom Full-Width Copy Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF38BDF8),
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: () => _copyPromptToClipboard(fullPrompt),
-              icon: const Icon(Icons.copy, size: 16),
-              label: const Text(
-                'Copy Master AI Prompt (2-3 2D & 3D)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
-              ),
             ),
           ),
         ],

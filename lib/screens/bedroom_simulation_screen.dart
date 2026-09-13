@@ -102,75 +102,42 @@ class Item3DSpatial {
   static List<Item3DSpatial> computeItemSpatials({
     required DynamicFloorDimensions dims,
     required List<RoomItemPlacement> placements,
-    required List<MathematicalItemDimension> calculatedItems,
+    List<MathematicalItemDimension>? calculatedItems,
     String? selectedItemId,
   }) {
     if (placements.isEmpty) return [];
 
-    const canvasSize = Size(1800, 1500);
-    const scale = 28.0;
-    final origin = DynamicFloor2DPainter.getOrigin(dims: dims, canvasSize: canvasSize, scale: scale);
-    final rectMap = DynamicFloor2DPainter.calculateItemRects(
+    final recalibrated = ArchitecturalPromptService.recalibrateSpatialLayout(
       dims: dims,
-      items: calculatedItems,
-      canvasSize: canvasSize,
-      scale: scale,
+      placements: placements,
     );
 
     final List<Item3DSpatial> results = [];
 
-    for (int i = 0; i < calculatedItems.length; i++) {
-      final mathItem = calculatedItems[i];
+    for (int i = 0; i < recalibrated.items.length; i++) {
+      final item = recalibrated.items[i];
       final placement = (i < placements.length)
           ? placements[i]
-          : RoomItemPlacement(itemName: mathItem.itemName, targetWall: mathItem.targetWall);
+          : RoomItemPlacement(itemName: item.itemName, targetWall: item.targetWall);
 
-      final rect = rectMap[mathItem.id] ?? Rect.fromLTWH(origin.dx + 28, origin.dy + 28, 28 * 3.5, 28 * 3.5);
-      final roomX = (rect.left - origin.dx) / scale;
-      final roomY = (rect.top - origin.dy) / scale;
-      final roomW = rect.width / scale;
-      final roomL = rect.height / scale;
-
-      // Determine 3D height
-      double roomH = mathItem.height;
-      if (placement.customHeight != null && placement.customHeight! > 0) {
-        roomH = placement.customHeight!;
-      } else if (roomH <= 0) {
-        final name = mathItem.itemName.toLowerCase();
-        if (name.contains('wardrobe') || name.contains('closet') || name.contains('cupboard') || name.contains('almirah')) {
-          roomH = 7.5;
-        } else if (name.contains('bed')) {
-          roomH = 2.2;
-        } else if (name.contains('study') || name.contains('desk') || name.contains('table') || name.contains('work')) {
-          roomH = 2.5;
-        } else if (name.contains('tv') || name.contains('media') || name.contains('console')) {
-          roomH = 1.8;
-        } else if (name.contains('sofa') || name.contains('couch') || name.contains('chair')) {
-          roomH = 2.4;
-        } else if (name.contains('book') || name.contains('shelf') || name.contains('cabinet')) {
-          roomH = 6.5;
-        } else {
-          roomH = 3.0;
-        }
-      }
-
-      final roomZ = placement.customElevation ?? mathItem.customElevation ?? 0.0;
+      final mathItem = item.toMathItem();
       final baseColor = DynamicFloor2DPainter.getItemColor(placement.id, placement.itemName, i);
       final topColor = baseColor.withValues(alpha: 0.85);
-      final isSelected = selectedItemId != null && (placement.id == selectedItemId || mathItem.id == selectedItemId);
+      final isSelected = selectedItemId != null &&
+          (placement.id == selectedItemId || item.id == selectedItemId);
 
       results.add(
         Item3DSpatial(
           mathItem: mathItem,
           placement: placement,
-          x: roomX,
-          y: roomY,
-          z: roomZ,
-          width: roomW,
-          length: roomL,
-          height: roomH,
-          facingDirection: mathItem.facingDirection,
-          targetWall: mathItem.targetWall,
+          x: item.x,
+          y: item.y,
+          z: item.z,
+          width: item.width,
+          length: item.length,
+          height: item.height,
+          facingDirection: item.facingDirection,
+          targetWall: item.targetWall,
           baseColor: baseColor,
           topColor: topColor,
           isSelected: isSelected,
